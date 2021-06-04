@@ -324,8 +324,6 @@ class ReleaseOverview extends AsyncView<Props> {
                   version={version}
                   location={location}
                   defaultStatsPeriod={defaultStatsPeriod}
-                  queryFilterDescription={t('In this release')}
-                  withChart
                 />
                 <Feature features={['performance-view']}>
                   <TransactionsList
