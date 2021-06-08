@@ -67,6 +67,7 @@ describe('ReleasesList', function () {
   });
 
   afterEach(function () {
+    wrapper.unmount();
     ProjectsStore.reset();
     MockApiClient.clearMockResponses();
   });
@@ -83,7 +84,7 @@ describe('ReleasesList', function () {
     expect(items.at(2).find('Header').text()).toContain('Project');
   });
 
-  it('displays the right empty state', function () {
+  it('displays the right empty state', async function () {
     let location;
     MockApiClient.addMockResponse({
       url: '/organizations/org-slug/releases/',
@@ -91,44 +92,59 @@ describe('ReleasesList', function () {
     });
 
     location = {query: {}};
+    wrapper.unmount();
     wrapper = mountWithTheme(
       <ReleasesList {...props} location={location} />,
       routerContext
     );
+    await tick();
+    wrapper.update();
     expect(wrapper.find('StyledPanel')).toHaveLength(0);
     expect(wrapper.find('Promo').text()).toContain('Demystify Releases');
 
     location = {query: {statsPeriod: '30d'}};
+    wrapper.unmount();
     wrapper = mountWithTheme(
       <ReleasesList {...props} location={location} />,
       routerContext
     );
+    await tick();
+    wrapper.update();
     expect(wrapper.find('StyledPanel')).toHaveLength(0);
     expect(wrapper.find('EmptyMessage').text()).toEqual('There are no releases.');
 
     location = {query: {query: 'abc'}};
+    wrapper.unmount();
     wrapper = mountWithTheme(
       <ReleasesList {...props} location={location} />,
       routerContext
     );
+    await tick();
+    wrapper.update();
     expect(wrapper.find('EmptyMessage').text()).toEqual(
       "There are no releases that match: 'abc'."
     );
 
     location = {query: {sort: SortOption.SESSIONS, statsPeriod: '7d'}};
+    wrapper.unmount();
     wrapper = mountWithTheme(
       <ReleasesList {...props} location={location} />,
       routerContext
     );
+    await tick();
+    wrapper.update();
     expect(wrapper.find('EmptyMessage').text()).toEqual(
       'There are no releases with data in the last 7 days.'
     );
 
     location = {query: {sort: SortOption.USERS_24_HOURS, statsPeriod: '7d'}};
+    wrapper.unmount();
     wrapper = mountWithTheme(
       <ReleasesList {...props} location={location} />,
       routerContext
     );
+    await tick();
+    wrapper.update();
     expect(wrapper.find('EmptyMessage').text()).toEqual(
       'There are no releases with active user data (users in the last 24 hours).'
     );
