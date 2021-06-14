@@ -1,3 +1,5 @@
+from typing import Mapping, Optional, Sequence
+
 from sentry_sdk import configure_scope
 
 from sentry.constants import ObjectStatus
@@ -10,19 +12,18 @@ class RepositoryMixin:
     # dynamically given a search query
     repo_search = False
 
-    def format_source_url(self, repo, filepath, branch):
-        """
-        Formats the source code url used for stack trace linking.
-        """
+    def format_source_url(self, repo: Repository, filepath: str, branch: str) -> str:
+        """ Formats the source code url used for stack trace linking. """
         raise NotImplementedError
 
-    def check_file(self, repo, filepath, branch):
+    def check_file(self, repo: Repository, filepath: str, branch: str) -> Optional[str]:
         """
         Calls the client's `check_file` method to see if the file exists.
         Returns the link to the file if it's exists, otherwise return `None`.
 
-        So far only GitHub and GitLab have this implemented, both of which give use back 404s. If for some reason an integration gives back
-        a different status code, this method could be overwritten.
+        So far only GitHub and GitLab have this implemented, both of which give
+        use back 404s. If for some reason an integration gives back a different
+        status code, this method could be overwritten.
 
         repo: Repository (object)
         filepath: file from the stacktrace (string)
@@ -40,7 +41,9 @@ class RepositoryMixin:
 
         return self.format_source_url(repo, filepath, branch)
 
-    def get_stacktrace_link(self, repo, filepath, default, version):
+    def get_stacktrace_link(
+        self, repo: Repository, filepath: str, default: str, version: str
+    ) -> Optional[str]:
         """
         Handle formatting and returning back the stack trace link if the client
         request was successful.
@@ -48,8 +51,8 @@ class RepositoryMixin:
         Uses the version first, and re-tries with the default branch if we 404
         trying to use the version (commit sha).
 
-        If no file was found return `None`, and re-raise for non "Not Found" errors
-
+        If no file was found return `None`, and re-raise for non-"Not Found"
+        errors, like 403 "Account Suspended".
         """
         with configure_scope() as scope:
             scope.set_tag("stacktrace_link.tried_version", False)
@@ -64,7 +67,7 @@ class RepositoryMixin:
 
         return source_url
 
-    def get_repositories(self, query=None):
+    def get_repositories(self, query: Optional[str] = None) -> Sequence[Repository]:
         """
         Get a list of available repositories for an installation
 
@@ -82,13 +85,11 @@ class RepositoryMixin:
         """
         raise NotImplementedError
 
-    def get_unmigratable_repositories(self):
+    def get_unmigratable_repositories(self) -> Sequence[Repository]:
         return []
 
-    def reinstall_repositories(self):
-        """
-        reinstalls repositories associated with the integration
-        """
+    def reinstall_repositories(self) -> None:
+        """ Reinstalls repositories associated with the integration. """
         organizations = self.model.organizations.all()
         Repository.objects.filter(
             organization_id__in=organizations.values_list("id", flat=True),
@@ -96,10 +97,10 @@ class RepositoryMixin:
             integration_id=self.model.id,
         ).update(status=ObjectStatus.VISIBLE)
 
-    def has_repo_access(self, repo):
+    def has_repo_access(self, repo: Repository) -> bool:
         raise NotImplementedError
 
-    def get_codeowner_file(self, repo, ref=None):
+    def get_codeowner_file(self, repo: Repository, ref: Optional[str] = None) -> Mapping[str, str]:
         """
         Find and get the contents of a CODEOWNERS file.
         Should use client().get_file to get and decode the contents.

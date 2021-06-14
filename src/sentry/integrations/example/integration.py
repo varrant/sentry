@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.http import HttpResponse
 
 from sentry.integrations import (
@@ -9,7 +11,7 @@ from sentry.integrations import (
 )
 from sentry.integrations.issues import IssueSyncMixin
 from sentry.mediators.plugins import Migrator
-from sentry.models import User
+from sentry.models import Repository, User
 from sentry.pipeline import PipelineView
 from sentry.shared_integrations.exceptions import IntegrationError
 
@@ -142,10 +144,12 @@ class ExampleIntegration(IntegrationInstallation, IssueSyncMixin):
     def get_issue_display_name(self, external_issue):
         return "display name: %s" % external_issue.key
 
-    def get_stacktrace_link(self, repo, path, default, version):
+    def get_stacktrace_link(
+        self, repo: Repository, filepath: str, default: str, version: str
+    ) -> Optional[str]:
         pass
 
-    def format_source_url(self, repo, filepath, branch):
+    def format_source_url(self, repo: Repository, filepath: str, branch: str) -> str:
         return f"https://example.com/{repo.name}/blob/{branch}/{filepath}"
 
 
