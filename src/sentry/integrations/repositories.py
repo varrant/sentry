@@ -13,7 +13,7 @@ class RepositoryMixin:
     repo_search = False
 
     def format_source_url(self, repo: Repository, filepath: str, branch: str) -> str:
-        """ Formats the source code url used for stack trace linking. """
+        """Formats the source code url used for stack trace linking."""
         raise NotImplementedError
 
     def check_file(self, repo: Repository, filepath: str, branch: str) -> Optional[str]:
@@ -89,7 +89,7 @@ class RepositoryMixin:
         return []
 
     def reinstall_repositories(self) -> None:
-        """ Reinstalls repositories associated with the integration. """
+        """Reinstalls repositories associated with the integration."""
         organizations = self.model.organizations.all()
         Repository.objects.filter(
             organization_id__in=organizations.values_list("id", flat=True),
