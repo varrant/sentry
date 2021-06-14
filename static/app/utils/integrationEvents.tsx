@@ -1,7 +1,7 @@
 import {StacktraceErrorMessage} from 'app/components/events/interfaces/stacktraceLink';
 import {IntegrationType, PlatformType, SentryAppStatus} from 'app/types';
 
-//define the various event paylaods
+//define the various event payloads
 type View = {
   view?:
     | 'external_install'
