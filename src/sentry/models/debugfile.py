@@ -369,9 +369,11 @@ def determine_dif_kind(path):
 
 
 def detect_dif_from_path(path, name=None, debug_id=None):
-    """This detects which kind of dif(Debug Information File) the path
-    provided is. It returns an array since an Archive can contain more than
-    one Object.
+    """Detects which kind of Debug Information File (DIF) the file at `path` is.
+
+    :returns: an array since an Archive can contain more than one Object.
+
+    :raises BadDif: If the file is not a valid DIF.
     """
     # proguard files (proguard/UUID.txt) or
     # (proguard/mapping-UUID.txt).
