@@ -1,5 +1,25 @@
+import sentry_sdk
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models.fields.related_descriptors import ReverseOneToOneDescriptor
+from sentry_sdk.integrations import Integration
+
+
+class DjangoAtomicIntegration(Integration):
+    identifier = "django_atomic"
+
+    @staticmethod
+    def setup_once():
+        from django.db import DEFAULT_DB_ALIAS, transaction
+
+        original_atomic = transaction.atomic
+
+        def _atomic(using=None, savepoint=True):
+            with sentry_sdk.start_span(op="transaction.atomic") as span:
+                # using can be callable if atomic is used as bare decorator @atomic
+                span.set_data("using", using if using and not callable(using) else DEFAULT_DB_ALIAS)
+                return original_atomic(using=using, savepoint=savepoint)
+
+        transaction.atomic = _atomic
 
 
 def attach_foreignkey(objects, field, related=(), database=None):
